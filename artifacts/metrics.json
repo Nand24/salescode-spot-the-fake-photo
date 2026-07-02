@@ -1,0 +1,38 @@
+{
+  "accuracy": 1.0,
+  "roc_auc": 1.0,
+  "cv_accuracy": 0.9689922480620154,
+  "cv_roc_auc": 0.9650121065375304,
+  "threshold": 0.05,
+  "cv_threshold": 0.26999999999999996,
+  "n_train": 103,
+  "n_test": 26,
+  "train_time_ms": 262.13930000085384,
+  "classification_report": {
+    "real": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 12.0
+    },
+    "screen": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 14.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 26.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 26.0
+    }
+  }
+}
