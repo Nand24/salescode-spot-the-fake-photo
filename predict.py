@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 from typing import Any, Dict
 
@@ -12,13 +13,39 @@ from src.features import extract_features_from_bgr, load_and_extract
 
 
 MODEL_PATH = Path("artifacts/model.joblib")
+METRICS_PATH = Path("artifacts/metrics.json")
 DEFAULT_THRESHOLD = 0.5
 
+_MODEL_BUNDLE: Any = None
+_MODEL_LOAD_FAILED = False
 
-def _load_model_bundle() -> Dict[str, Any] | None:
+
+def _read_metrics() -> Dict[str, Any]:
+    if not METRICS_PATH.exists():
+        return {}
+    try:
+        return json.loads(METRICS_PATH.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
+def _load_model_bundle():
+    global _MODEL_BUNDLE, _MODEL_LOAD_FAILED
+
+    if _MODEL_LOAD_FAILED:
+        return None
+    if _MODEL_BUNDLE is not None:
+        return _MODEL_BUNDLE
     if not MODEL_PATH.exists():
         return None
-    return joblib.load(MODEL_PATH)
+
+    try:
+        _MODEL_BUNDLE = joblib.load(MODEL_PATH)
+    except Exception:
+        _MODEL_LOAD_FAILED = True
+        return None
+
+    return _MODEL_BUNDLE
 
 
 def _heuristic_probability(feature_values: np.ndarray) -> float:
@@ -57,6 +84,12 @@ def _heuristic_probability(feature_values: np.ndarray) -> float:
 
 
 def get_threshold() -> float:
+    metrics = _read_metrics()
+    if "cv_threshold" in metrics:
+        return float(metrics["cv_threshold"])
+    if "threshold" in metrics:
+        return float(metrics["threshold"])
+
     bundle = _load_model_bundle()
     if isinstance(bundle, dict) and "threshold" in bundle:
         return float(bundle["threshold"])

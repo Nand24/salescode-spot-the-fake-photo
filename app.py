@@ -15,22 +15,21 @@ st.set_page_config(
     layout="centered",
 )
 
-THRESHOLD = get_threshold()
 
-
-def _verdict(score: float) -> tuple[str, str]:
-    if score >= THRESHOLD:
+def _verdict(score: float, threshold: float) -> tuple[str, str]:
+    if score >= threshold:
         return "PHOTO OF A SCREEN", "🔴"
     return "REAL PHOTO", "🟢"
 
 
 def _show_result(image_rgb: np.ndarray, score: float, latency_ms: float) -> None:
-    label, icon = _verdict(score)
+    threshold = get_threshold()
+    label, icon = _verdict(score, threshold)
     st.image(image_rgb, caption="Captured frame", use_container_width=True)
 
     col1, col2, col3 = st.columns(3)
     col1.metric("Screen score", f"{score:.3f}")
-    col2.metric("Threshold", f"{THRESHOLD:.3f}")
+    col2.metric("Threshold", f"{threshold:.3f}")
     col3.metric("Latency", f"{latency_ms:.0f} ms")
 
     st.progress(float(score), text=f"{icon} {label}")
