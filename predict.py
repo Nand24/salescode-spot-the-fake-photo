@@ -6,10 +6,15 @@ from pathlib import Path
 from typing import Any, Dict
 
 import cv2
-import joblib
 import numpy as np
 
 from src.features import extract_features_from_bgr, load_and_extract
+from src.inference import score_from_json, threshold_from_json
+
+try:
+    import joblib
+except ImportError:  # pragma: no cover - optional for lightweight cloud deploy
+    joblib = None
 
 
 MODEL_PATH = Path("artifacts/model.joblib")
@@ -32,7 +37,7 @@ def _read_metrics() -> Dict[str, Any]:
 def _load_model_bundle():
     global _MODEL_BUNDLE, _MODEL_LOAD_FAILED
 
-    if _MODEL_LOAD_FAILED:
+    if joblib is None or _MODEL_LOAD_FAILED:
         return None
     if _MODEL_BUNDLE is not None:
         return _MODEL_BUNDLE
@@ -84,6 +89,10 @@ def _heuristic_probability(feature_values: np.ndarray) -> float:
 
 
 def get_threshold() -> float:
+    json_threshold = threshold_from_json()
+    if json_threshold is not None:
+        return json_threshold
+
     metrics = _read_metrics()
     if "cv_threshold" in metrics:
         return float(metrics["cv_threshold"])
@@ -97,6 +106,10 @@ def get_threshold() -> float:
 
 
 def _score_features(feat: np.ndarray) -> float:
+    json_score = score_from_json(feat)
+    if json_score is not None:
+        return max(0.0, min(1.0, json_score))
+
     bundle = _load_model_bundle()
     feat = feat.reshape(1, -1)
 

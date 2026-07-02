@@ -6,3 +6,4 @@ data/
 artifacts/*
 !artifacts/model.joblib
 !artifacts/metrics.json
+!artifacts/inference.json

@@ -16,6 +16,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 from src.features import load_and_extract
+from src.export_model import export_inference_json
 
 
 def _collect_images(folder: Path) -> List[Path]:
@@ -71,12 +72,14 @@ def main() -> None:
     parser.add_argument("--data-dir", default="data", help="Folder containing real/ and screen/")
     parser.add_argument("--model-out", default="artifacts/model.joblib")
     parser.add_argument("--metrics-out", default="artifacts/metrics.json")
+    parser.add_argument("--inference-out", default="artifacts/inference.json")
     parser.add_argument("--model", choices=["logreg", "gbm"], default="gbm")
     args = parser.parse_args()
 
     data_dir = Path(args.data_dir)
     model_out = Path(args.model_out)
     metrics_out = Path(args.metrics_out)
+    inference_out = Path(args.inference_out)
     model_out.parent.mkdir(parents=True, exist_ok=True)
 
     X, y = build_dataset(data_dir)
@@ -124,10 +127,12 @@ def main() -> None:
     }
 
     joblib.dump(bundle, model_out)
+    export_inference_json(pipeline, cv_threshold, inference_out)
     metrics_out.parent.mkdir(parents=True, exist_ok=True)
     metrics_out.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
 
     print(f"Saved model to: {model_out}")
+    print(f"Saved inference to: {inference_out}")
     print(f"Saved metrics to: {metrics_out}")
     print(f"Holdout Accuracy: {acc:.4f} | ROC-AUC: {auc:.4f}")
     print(f"CV Accuracy (tuned threshold): {cv_accuracy:.4f} | CV ROC-AUC: {cv_auc:.4f}")

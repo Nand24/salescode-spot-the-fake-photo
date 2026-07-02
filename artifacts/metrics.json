@@ -7,7 +7,7 @@
   "cv_threshold": 0.26999999999999996,
   "n_train": 103,
   "n_test": 26,
-  "train_time_ms": 137.31419999385253,
+  "train_time_ms": 110.36749999038875,
   "classification_report": {
     "real": {
       "precision": 1.0,
